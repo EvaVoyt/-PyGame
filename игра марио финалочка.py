@@ -4,20 +4,25 @@ from pygame.locals import *
 import random
 import time
 
-# Инициализация Pygame
+
 pygame.init()
+pygame.mixer.init()
 
 # Настройки экрана
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Клетчатое поле - Собери монетки!")
+pygame.display.set_caption("Марио - Собери монетки!")
 
 # Цвета
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 RED = (255, 0, 0)
-
+GREEN = (6, 72, 58)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+ORANGE = (255, 128, 0)
+LIGHT_BLUE = (91, 146, 229)
 # Размеры клетки
 TILE_SIZE = 50
 
@@ -25,69 +30,100 @@ TILE_SIZE = 50
 GRID_WIDTH = SCREEN_WIDTH // TILE_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // TILE_SIZE
 
-# Загрузка изображений
-player_image = pygame.image.load("data/mario.png")   # Изображение игрока
-coin_image = pygame.image.load("data/star.png")      # Изображение монетки
-wall_image = pygame.image.load("data/box.png")      # Изображение стены
-enemy_image = pygame.image.load("data/dragon.png")    # Изображение врага
-grass_image = pygame.image.load("data/grass.png")    # Изображение травы
-flag_image = pygame.image.load("data/flag.png")    # Изображение травы
-fire_image = pygame.image.load("data/fireball.png")  # Изображение огонька
+# Загрузка фоновой музыки
+pygame.mixer.music.load("music.mp3")  # Путь к файлу фоновой музыки
+pygame.mixer.music.set_volume(0.5    )  # Установка громкости
+pygame.mixer.music.play(-1)  # Бесконечное воспроизведение
 
+
+# Загрузка изображений
+player_image = pygame.image.load("data/mario.png")
+coin_image = pygame.image.load("data/star.png")
+wall_image = pygame.image.load("data/box.png")
+enemy_image1 = pygame.image.load("data/dragon1.png")
+enemy_image2 = pygame.image.load("data/dragon2.png")
+grass_image = pygame.image.load("data/grass.png")
+flag_image = pygame.image.load("data/flag.png")
+fire_image = pygame.image.load("data/fireball.png")
+question_image = pygame.image.load("data/question.png")
+riddle_bg_img = pygame.image.load("data/zagadka.png")
+fon_image = pygame.image.load("data/fon.jpg")
 
 # Масштабирование изображений под размер клетки
 player_image = pygame.transform.scale(player_image, (TILE_SIZE, TILE_SIZE))
 coin_image = pygame.transform.scale(coin_image, (TILE_SIZE, TILE_SIZE))
 wall_image = pygame.transform.scale(wall_image, (TILE_SIZE, TILE_SIZE))
-enemy_image = pygame.transform.scale(enemy_image, (TILE_SIZE, TILE_SIZE))
+enemy_image1 = pygame.transform.scale(enemy_image1, (TILE_SIZE, TILE_SIZE))
+enemy_image2 = pygame.transform.scale(enemy_image2, (TILE_SIZE, TILE_SIZE))
 grass_image = pygame.transform.scale(grass_image, (TILE_SIZE, TILE_SIZE))
 flag_image = pygame.transform.scale(flag_image, (TILE_SIZE, TILE_SIZE))
 fire_image = pygame.transform.scale(fire_image, (TILE_SIZE, TILE_SIZE))
+question_image = pygame.transform.scale(question_image, (TILE_SIZE, TILE_SIZE))
+riddle_bg_img = pygame.transform.scale(riddle_bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
+fon_image = pygame.transform.scale(fon_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
 # Определение уровней
 levels = [
     [
         'WWWWWWWWWWWWWWWW',
-        'W   C     P    W',
-        'W              W',
-        'W   W     E    W',
-        'W   W          W',
-        'W   C     W    W',
+        'W   C   W  P  WW',
+        'W      W W   W W',
+        'WWW  W     E   W',
+        'W   W    WW    W',
+        'WW    C   I  W W',
         'W  E           W',
-        'W   W          W',
-        'W   C     W    W',
-        'W  E           W',
-        'W        C    FW',
+        'W   W      WWW W',
+        'WCW  C WWWW    W',
+        'W  E   W       W',
+        'W     WW   C   FW',
         'WWWWWWWWWWWWWWWW',
     ],
     [
         'WWWWWWWWWWWWWWWW',
-        'W   C      E   W',
-        'W       C      W',
-        'W   W     C    W',
-        'W  E      W    W',
-        'W  E C         W',
-        'W              W',
-        'W   W    C     W',
-        'W   C          W',
-        'W  E       P   W',
-        'W       C     FW',
+        'WWW E  C     EWW',
+        'W    W   C    WW',
+        'W   W     C  WIW',
+        'W  E    W  WCW W',
+        'W  E C       W W',
+        'W    W C  WW   W',
+        'W W  W W   C  WW',
+        'W   C   WW     W',
+        'W  E   WWWW  P W',
+        'W     W W C WW FW',
         'WWWWWWWWWWWWWWWW',
     ],
     [
         'WWWWWWWWWWWWWWWW',
         'W  E       E   W',
-        'W       C      W',
-        'W   W     C    W',
+        'W   W C W  C   W',
+        'W   WWWWW     CW',
         'W  E      W    W',
-        'W  E C       E W',
-        'W P         С  W',
-        'W   W    C     W',
-        'W   C          W',
-        'W   E          W',
-        'W P       C   FW',
+        'WWE C      W  EW',
+        'WWP     W    C W',
+        'WW  W I W C    W',
+        'W   C    W    WW',
+        'W   E      W  WW',
+        'W   WWW      CFW',
         'WWWWWWWWWWWWWWWW',
     ]
 ]
+
+# Список загадок для каждого уровня
+riddles = [
+    {
+        "question": "Какая птица носит название фрукта?",
+        "answer": "киви"
+    },
+    {
+        "question": "Каких камней не бывает в речке?",
+        "answer": "сухих"
+    },
+    {
+        "question": "Что не вместится даже в самую большую кастрюлю?",
+        "answer": "её крышка"
+    }
+]
+
 # Функция для отображения окна после уровня
 def show_level_result(screen, message, color):
     screen.fill((156, 180, 100))  # Зеленый фон
@@ -98,188 +134,254 @@ def show_level_result(screen, message, color):
     pygame.display.flip()  # Обновляем экран
     time.sleep(2)  # Ждем 2 секунды
 
+
+# Функция для загрузки рекорда из файла
+def load_record():
+    try:
+        with open("records.txt", "r") as file:
+            lines = file.readlines()
+            if len(lines) >= 2:
+                return int(lines[0].strip()), int(lines[1].strip())
+    except FileNotFoundError:
+        pass
+    return 0, 0  # Возвращаем 0, если файл не существует
+
+
+# Функция для сохранения рекорда в файл
+def save_record(score, record, enemies_killed):
+    with open("records.txt", "w") as file:
+        file.write(f"{record}\n")  # Сохраняем рекорд
+        file.write(f"{score}\n")  # Сохраняем последний результат
+        file.write(f"{enemies_killed}\n")
+
+
 # Класс игрока
-class Player:
+class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        super().__init__()
+        self.image = player_image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x * TILE_SIZE, y * TILE_SIZE)
 
     def move(self, dx, dy, walls):
-        new_x = self.x + dx
-        new_y = self.y + dy
-        if 0 <= new_y < len(walls) and 0 <= new_x < len(walls[0]):
-            if not walls[new_y][new_x]:
-                self.x = new_x
-                self.y = new_y
+        new_rect = self.rect.move(dx * TILE_SIZE, dy * TILE_SIZE)
+        if not any(new_rect.colliderect(wall.rect) for wall in walls):
+            self.rect = new_rect
 
-    def draw(self, surface):
-        surface.blit(player_image, (self.x * TILE_SIZE, self.y * TILE_SIZE))
 
 # Класс монетки
-class Coin:
+class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.collected = False
+        super().__init__()
+        self.image = coin_image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x * TILE_SIZE, y * TILE_SIZE)
 
-    def draw(self, surface):
-        if not self.collected:
-            surface.blit(coin_image, (self.x * TILE_SIZE, self.y * TILE_SIZE))
 
-class Flag:
+# Класс интеллектуальной клетки
+class IntelligenceCell(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        super().__init__()
+        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
+        self.image = question_image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x * TILE_SIZE, y * TILE_SIZE)
 
 
-    def draw(self, surface):
-        surface.blit(flag_image, (self.x * TILE_SIZE, self.y * TILE_SIZE))
-
-
-# Класс для огоньков
-class Projectile:
-    def __init__(self, x, y, direction):
-        self.x = x
-        self.y = y
-        self.direction = direction  # Направление движения (1 - вправо, -1 - влево)
-
-    def move(self):
-        self.x += self.direction  # Двигаемся в указанном направлении
-
-    def draw(self, surface):
-        # Отрисовываем изображение огонька вместо красного квадрата
-        surface.blit(fire_image, (self.x * TILE_SIZE, self.y * TILE_SIZE))
-
-# Класс врага с возможностью возрождения
-class Enemy:
+class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.facing_right = True  # True, если движется вправо
-        self.image = enemy_image  # Изначальное изображение
+        super().__init__()
+        # Загрузка анимационных кадров
+        self.frames = [
+            pygame.transform.scale(pygame.image.load("data/dragon1.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/dragon2.png"), (TILE_SIZE, TILE_SIZE))
+        ]
+        self.current_frame = 0
+        self.image = self.frames[self.current_frame]  # Начальное изображение
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x * TILE_SIZE, y * TILE_SIZE)
+        self.direction = random.choice([-1, 1])  # Начальное направление движения
+        self.animation_timer = 0  # Таймер для анимации
+        self.facing_right = self.direction > 0  # Проверяем, движется ли враг вправо
+
+    def update_animation(self):
+        # Обновление анимации
+        self.animation_timer += 1
+        if self.animation_timer >= 15:  # Смена кадра каждые 10 кадров
+            self.animation_timer = 0
+            self.current_frame = (self.current_frame + 1) % len(self.frames)
+            self.image = self.frames[self.current_frame]
+            # Если враг движется влево, отражаем изображение
+            if not self.facing_right:
+                self.image = pygame.transform.flip(self.image, True, False)
 
     def move(self, walls):
-        new_x = self.x + (1 if self.facing_right else -1)
-
-        # Проверяем, находится ли новая позиция в пределах поля и не является ли она стеной
-        if 0 <= new_x < len(walls[0]) and not walls[self.y][new_x]:
-            self.x = new_x  # Двигаемся вперед
+        new_rect = self.rect.move(self.direction * TILE_SIZE, 0)
+        if not any(new_rect.colliderect(wall.rect) for wall in walls):
+            self.rect = new_rect
         else:
-            self.facing_right = not self.facing_right  # Меняем направление взгляда
-            self.update_image()  # Обновляем изображение
+            # При столкновении со стеной меняем направление
+            self.direction *= -1
+            self.facing_right = not self.facing_right  # Меняем ориентацию
+            # Обновляем изображение сразу после разворота
+            self.image = pygame.transform.flip(self.image, True, False)
 
-    def update_image(self):
-        self.image = pygame.transform.flip(enemy_image, not self.facing_right, False)
+    def update(self, walls):
+        self.move(walls)  # Движение
+        self.update_animation()  # Обновление анимации
+# Класс огонька
+class Projectile(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):
+        super().__init__()
+        self.image = fire_image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x * TILE_SIZE, y * TILE_SIZE)
+        self.dx, self.dy = direction
 
-    def respawn(self, walls):
-        # Находим случайную свободную клетку для возрождения
-        while True:
-            new_x = random.randint(0, GRID_WIDTH - 1)
-            new_y = random.randint(0, GRID_HEIGHT - 1)
-            if not walls[new_y][new_x]:
-                self.x = new_x
-                self.y = new_y
-                break
+    def update(self):
+        self.rect = self.rect.move(self.dx * TILE_SIZE, self.dy * TILE_SIZE)
 
-    def draw(self, surface):
-        surface.blit(self.image, (self.x * TILE_SIZE, self.y * TILE_SIZE))
 
-# Функция отображения текста
-def draw_text(text, font, color, surface, x, y):
-    text_obj = font.render(text, 1, color)
-    text_rect = text_obj.get_rect()
-    text_rect.topleft = (x, y)
-    surface.blit(text_obj, text_rect)
+# Класс флага
+class Flag(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = flag_image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x * TILE_SIZE, y * TILE_SIZE)
+
 
 # Функция загрузки уровня
 def load_level(level_index):
     level_data = levels[level_index]
-    player_x, player_y = 0, 0
-    coins = []
-    enemies = []
-    walls = []
-    flag = None  # Переменная для хранения флага
+    player_group = pygame.sprite.Group()
+    coins_group = pygame.sprite.Group()
+    enemies_group = pygame.sprite.Group()
+    walls = pygame.sprite.Group()
+    flag_group = pygame.sprite.Group()
+    intelligence_cells = pygame.sprite.Group()
+
     for row_index, row in enumerate(level_data):
-        wall_row = []
         for col_index, cell in enumerate(row):
             if cell == 'P':  # Игрок
-                player_x, player_y = col_index, row_index
-                wall_row.append(False)
+                player = Player(col_index, row_index)
+                player_group.add(player)
             elif cell == 'C':  # Монетка
-                coins.append(Coin(col_index, row_index))
-                wall_row.append(False)
+                coins_group.add(Coin(col_index, row_index))
             elif cell == 'W':  # Стена
-                wall_row.append(True)
+                wall = pygame.sprite.Sprite()
+                wall.image = wall_image
+                wall.rect = wall.image.get_rect()
+                wall.rect.topleft = (col_index * TILE_SIZE, row_index * TILE_SIZE)
+                walls.add(wall)
             elif cell == 'E':  # Враг
-                enemies.append(Enemy(col_index, row_index))
-                wall_row.append(False)
+                enemies_group.add(Enemy(col_index, row_index))
             elif cell == 'F':  # Флаг
-                flag = Flag(col_index, row_index)  # Создаем объект флага
-                wall_row.append(False)
-            else:  # Пустое место
-                wall_row.append(False)
-        walls.append(wall_row)
-    player = Player(player_x, player_y)
-    return player, coins, enemies, walls, flag  # Возвращаем флаг
+                flag_group.add(Flag(col_index, row_index))
+            elif cell == 'I':  # Интеллектуальная клетка
+                intelligence_cells.add(IntelligenceCell(col_index, row_index))
 
-# Функция стартового окна
-def start_screen():
-    while True:
-        screen.fill((156, 180, 100))  # Зеленый фон
-        draw_text("Чтобы начать игру, нажмите пробел", font, BLUE, screen, SCREEN_WIDTH // 2 - 210, SCREEN_HEIGHT // 2)
+    return player_group, coins_group, enemies_group, walls, flag_group, intelligence_cells
+
+
+# Функция для отображения загадки
+def display_riddle(question):
+    input_box = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2, 200, 32)
+    color_inactive = pygame.Color('slategrey')
+    color_active = pygame.Color('black')
+    color = color_inactive
+    active = False
+    text = ''
+    done = False
+
+    while not done:
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == KEYDOWN and event.key == K_SPACE:
-                return
-        pygame.display.flip()
-        clock.tick(60)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_box.collidepoint(event.pos):
+                    active = not active
+                else:
+                    active = False
+                color = color_active if active else color_inactive
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_RETURN:
+                        done = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        text = text[:-1]
+                    else:
+                        text += event.unicode
 
-# Функция финального окна
-def end_screen(score):
-    while True:
-        screen.fill((156, 180, 100))  # Зеленый фон
-        draw_text(f"Игра закончена. Your Score: {score}", font, RED, screen, SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 - 50)
-        draw_text("Нажмите R, чтобы перезапустить, или ESC, чтобы выйти", font, BLUE, screen, SCREEN_WIDTH // 2 - 330, SCREEN_HEIGHT // 2 + 50)
+                # Отрисовка фона загадки
+
+        screen.blit(riddle_bg_img, (0, 0))
+        txt_surface = font.render(text, True, color)
+        width = max(200, txt_surface.get_width() + 10)
+        input_box.w = width
+        screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+        pygame.draw.rect(screen, color, input_box, 2)
+
+        question_text = font.render(question, True, BLACK)
+        screen.blit(question_text, (SCREEN_WIDTH // 2 - question_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
+
+        pygame.display.flip()
+
+    return text
+
+
+# Функция для отображения стартового окна
+def start_screen():
+    screen.blit(fon_image, (0, 0))
+    font = pygame.font.Font(None, 48)  # Создаем шрифт большего размера
+    title_text = font.render("Добро пожаловать в игру Марио!", True, BLACK)
+    title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100))
+    instruction_text = font.render("Нажмите SPACE, чтобы начать", True, RED)
+    instruction_rect = instruction_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+    klavishi_text = font.render("Используйте стрелки для перемещения героя", True, BLACK)
+    klavishi_rect = instruction_text.get_rect(center=(SCREEN_WIDTH // 2 - 130, SCREEN_HEIGHT // 2 + 100))
+    hero_text = font.render("и клавиши W/A/S/D для стрельбы", True, BLUE)
+    hero_rect = instruction_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
+
+    screen.blit(title_text, title_rect)
+    screen.blit(instruction_text, instruction_rect)
+    screen.blit(klavishi_text, klavishi_rect)
+    screen.blit(hero_text, hero_rect)
+    pygame.display.flip()
+
+    waiting_for_start = True
+    while waiting_for_start:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN:
-                if event.key == K_r:
-                    return True  # Перезапуск игры
-                if event.key == K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-        pygame.display.flip()
-        clock.tick(60)
+                if event.key == K_SPACE:
+                    waiting_for_start = False
 
-# Настройка шрифта
-font = pygame.font.Font(None, 36)
+
+# Вызов стартового окна перед основным циклом
+start_screen()
 
 # Основной игровой цикл
 current_level = 0
 max_levels = len(levels)
 score = 0
-enemies_killed = 0  # Счетчик убитых врагов
+enemies_killed = 0
 clock = pygame.time.Clock()
-FPS_1 = 3
-FPS_2 = 30
+FPS = 10
 
-# Список огоньков
-projectiles = []
-
-# Стартовое окно
-start_screen()
+# Загрузка рекорда
+record, _ = load_record()
 
 while current_level < max_levels:
-    player, coins, enemies, walls, flag = load_level(current_level)
+    player_group, coins_group, enemies_group, walls, flag_group, intelligence_cells = load_level(current_level)
+    projectiles = pygame.sprite.Group()
     running = True
 
     while running:
         screen.fill((0, 255, 0))  # Зеленый фон (трава)
-
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -288,105 +390,153 @@ while current_level < max_levels:
             # Обработка движения игрока
             if event.type == KEYDOWN:
                 if event.key == K_UP:
-                    player.move(0, -1, walls)
+                    player_group.sprites()[0].move(0, -1, walls)
                 elif event.key == K_DOWN:
-                    player.move(0, 1, walls)
+                    player_group.sprites()[0].move(0, 1, walls)
                 elif event.key == K_LEFT:
-                    player.move(-1, 0, walls)
+                    player_group.sprites()[0].move(-1, 0, walls)
                 elif event.key == K_RIGHT:
-                    player.move(1, 0, walls)
-                elif event.key == K_SPACE:  # Стрельба огоньком
-                    projectiles.append(Projectile(player.x, player.y, 1 if player.x < GRID_WIDTH // 2 else -1))
+                    player_group.sprites()[0].move(1, 0, walls)
 
-        # Обработка движения огоньков
-        for projectile in projectiles[:]:  # Создаем копию списка для безопасного удаления
-            projectile.move()
-            if not (0 <= projectile.x < GRID_WIDTH):  # Если огонек вышел за пределы поля
-                projectiles.remove(projectile)
-            else:
-                # Проверка столкновений с врагами
-                for enemy in enemies[:]:
-                    if projectile.x == enemy.x and projectile.y == enemy.y:
-                        enemies.remove(enemy)  # Удаляем врага
-                        enemies_killed += 1    # Увеличиваем счетчик убитых врагов
-                        score += 20
-                        enemy.respawn(walls)   # Возрождаем врага в случайной позиции
-                        projectiles.remove(projectile)  # Удаляем огонек
+                # Обработка стрельбы
+                elif event.key == K_w or event.key == K_UP:  # Стрельба вверх
+                    projectiles.add(Projectile(player_group.sprites()[0].rect.x // TILE_SIZE,
+                                               player_group.sprites()[0].rect.y // TILE_SIZE, (0, -1)))
+                elif event.key == K_s or event.key == K_DOWN:  # Стрельба вниз
+                    projectiles.add(Projectile(player_group.sprites()[0].rect.x // TILE_SIZE,
+                                               player_group.sprites()[0].rect.y // TILE_SIZE, (0, 1)))
+                elif event.key == K_a or event.key == K_LEFT:  # Стрельба влево
+                    projectiles.add(Projectile(player_group.sprites()[0].rect.x // TILE_SIZE,
+                                               player_group.sprites()[0].rect.y // TILE_SIZE, (-1, 0)))
+                elif event.key == K_d or event.key == K_RIGHT:  # Стрельба вправо
+                    projectiles.add(Projectile(player_group.sprites()[0].rect.x // TILE_SIZE,
+                                               player_group.sprites()[0].rect.y // TILE_SIZE, (1, 0)))
 
         # Проверка столкновений с монетками
-        for coin in coins[:]:  # Создаем копию списка для безопасного удаления
-            if player.x == coin.x and player.y == coin.y and not coin.collected:
-                coin.collected = True
-                score += 10
+        for coin in pygame.sprite.groupcollide(player_group, coins_group, False, True).values():
+            score += 15
 
         # Проверка столкновений с врагами
-        for enemy in enemies:
-            if player.x == enemy.x and player.y == enemy.y:
-                running = False  # Конец уровня из-за поражения
+        if pygame.sprite.groupcollide(player_group, enemies_group, False, False):
+            running = False  # Конец уровня из-за поражения
 
-        # Проверка столкновения с флагом
-        if flag and player.x == flag.x and player.y == flag.y:
+        # Проверка столкновений с флагом
+        if pygame.sprite.groupcollide(player_group, flag_group, False, False):
             show_level_result(screen, "Уровень пройден, поздравляем!", BLUE)
-            current_level += 1  # Переход на следующий уровень
-            break  # Выходим из игрового цикла
+            current_level += 1
+            break
+
+        # Проверка столкновений с интеллектуальной клеткой
+        for cell in pygame.sprite.groupcollide(player_group, intelligence_cells, False, True).keys():
+            riddle = riddles[current_level]  # Получаем загадку для текущего уровня
+            correct = riddle["answer"]
+            answer = display_riddle(riddle["question"])
+            if answer.lower() == riddle["answer"]:
+                score += 100
+                print(f"Правильно! Ваш счет: {score}")
+            else:
+                print(f"Неправильно! Правильный ответ: {correct}")
 
         # Движение врагов
-        for enemy in enemies:
-            enemy.move(walls)
+        for enemy in enemies_group:
+            enemy.update(walls)
+
+        # Обновление огоньков
+        projectiles.update()
+
+        # Проверка столкновений огоньков с врагами
+        for projectile in pygame.sprite.groupcollide(projectiles, enemies_group, True, True).keys():
+            enemies_killed += 1
+            score += 30
+
+        # Удаление огоньков за пределами поля
+        for projectile in projectiles.copy():
+            if not (0 <= projectile.rect.x < SCREEN_WIDTH and 0 <= projectile.rect.y < SCREEN_HEIGHT):
+                projectiles.remove(projectile)
 
         # Отрисовка игрового поля
-        for row in range(len(walls)):
-            for col in range(len(walls[row])):
-                if walls[row][col]:  # Стена
-                    screen.blit(wall_image, (col * TILE_SIZE, row * TILE_SIZE))
-                else:
-                    screen.blit(grass_image, (col * TILE_SIZE, row * TILE_SIZE))  # Трава
+        for row in range(GRID_HEIGHT):
+            for col in range(GRID_WIDTH):
+                screen.blit(grass_image, (col * TILE_SIZE, row * TILE_SIZE))
 
-        # Отрисовка монеток
-        for coin in coins:
-            coin.draw(screen)
+        # Отрисовка стен
+        walls.draw(screen)
 
-        # Отрисовка врагов
-        for enemy in enemies:
-            enemy.draw(screen)
-
-        # Отрисовка флага
-        if flag:
-            flag.draw(screen)
-
-        # Отрисовка игрока
-        player.draw(screen)
-
-        # Отрисовка огоньков
-        for projectile in projectiles:
-            projectile.draw(screen)
+        # Отрисовка всех спрайтов
+        player_group.draw(screen)
+        coins_group.draw(screen)
+        enemies_group.draw(screen)
+        flag_group.draw(screen)
+        intelligence_cells.draw(screen)
+        projectiles.draw(screen)
 
         # Отображение счета и убитых врагов
-        draw_text(f"Score: {score}", font, BLUE, screen, 10, 10)
-        draw_text(f"Enemies Killed: {enemies_killed}", font, RED, screen, 10, 40)
+        font = pygame.font.Font(None, 36)
+        score_text = font.render(f"Счёт: {score}", True, BLUE)
+        killed_text = font.render(f"Врагов убито: {enemies_killed}", True, RED)
+        screen.blit(score_text, (10, 10))
+        screen.blit(killed_text, (10, 40))
 
         pygame.display.flip()
-        clock.tick(FPS_1)
+        clock.tick(FPS)
+
+
+    # Функция для отображения одного сообщения на экране
+    def show_single_message(screen, message, color):
+        screen.fill((156, 180, 100))  # Зеленый фон
+        font = pygame.font.Font(None, 36)  # Создаем шрифт
+        text = font.render(message, True, color)
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        screen.blit(text, text_rect)
+        pygame.display.flip()  # Обновляем экран
+        time.sleep(2)  # Ждем 2 секунды
+
 
     # Если игрок проиграл
     if not running:
-        show_level_result(screen, "К сожалению, вы проиграли", RED)
-        restart = end_screen(score)
-        if restart:
-            current_level = 0
-            score = 0
-            enemies_killed = 0
-        else:
-            break
+        if score > record:
+            record = score
+        save_record(score, record, enemies_killed)
+
+        messages = [
+            (f"К сожалению, вы проиграли.", RED),
+            (f"Финальный счёт: {score}", BLUE),
+            (f"Врагов убито: {enemies_killed}", RED),
+            (f"Нажмите R, чтобы перезапустить, или Esc, чтобы выйти", GREEN)
+        ]
+
+        for message, color in messages:
+            show_single_message(screen, message, color)
+
+        waiting_for_input = True
+        while waiting_for_input:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == KEYDOWN:
+                    if event.key == K_r:
+                        current_level = 0
+                        score = 0
+                        enemies_killed = 0
+                        waiting_for_input = False
+                    elif event.key == K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+
+
 
 # Финальный экран после завершения всех уровней
 screen.fill((156, 180, 100))  # Зеленый фон
-draw_text("Поздравляем! Вы прошли все уровни, ура!", font, BLUE, screen, 100, SCREEN_HEIGHT // 2 - 50)
-draw_text(f"Финальный счёт: {score}", font, BLUE, screen, 100, SCREEN_HEIGHT // 2)
+font = pygame.font.Font(None, 48)
+congrats_text = font.render("Ура! Вы прошли все уровни!", True, BLUE)
+score_text = font.render(f"Финальный счёт: {score}, Врагов убито: {enemies_killed}", True, BLUE)
+screen.blit(congrats_text, (100, SCREEN_HEIGHT // 2 - 50))
+screen.blit(score_text, (100, SCREEN_HEIGHT // 2))
 pygame.display.flip()
+
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-
