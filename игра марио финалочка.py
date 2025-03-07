@@ -103,7 +103,7 @@ levels = [
         'WW  W I W C    W',
         'W   C    W    WW',
         'W   E      W  WW',
-        'W   WWW      CFW',
+        'W   WWW      C FW',
         'WWWWWWWWWWWWWWWW',
     ]
 ]
@@ -531,6 +531,7 @@ screen.fill((156, 180, 100))  # Зеленый фон
 font = pygame.font.Font(None, 48)
 congrats_text = font.render("Ура! Вы прошли все уровни!", True, BLUE)
 score_text = font.render(f"Финальный счёт: {score}, Врагов убито: {enemies_killed}", True, BLUE)
+save_record(score, record, enemies_killed)
 screen.blit(congrats_text, (100, SCREEN_HEIGHT // 2 - 50))
 screen.blit(score_text, (100, SCREEN_HEIGHT // 2))
 pygame.display.flip()
