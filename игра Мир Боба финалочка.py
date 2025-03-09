@@ -33,11 +33,10 @@ GRID_HEIGHT = SCREEN_HEIGHT // TILE_SIZE
 # Загрузка фоновой музыки
 pygame.mixer.music.load("music.mp3")
 pygame.mixer.music.set_volume(0.5)
-pygame.mixer.music.play(-1)  
+pygame.mixer.music.play(-1)
 
 
 # Загрузка изображений
-player_image = pygame.image.load("data/mario.png")
 coin_image = pygame.image.load("data/star.png")
 wall_image = pygame.image.load("data/preg.jpg")
 wood_image = pygame.image.load("data/wood.jpg")
@@ -48,7 +47,6 @@ riddle_bg_img = pygame.image.load("data/zagadka.png")
 fon_image = pygame.image.load("data/fon.jpg")
 
 # Масштабирование изображений под размер клетки
-player_image = pygame.transform.scale(player_image, (TILE_SIZE, TILE_SIZE))
 coin_image = pygame.transform.scale(coin_image, (TILE_SIZE, TILE_SIZE))
 wall_image = pygame.transform.scale(wall_image, (TILE_SIZE, TILE_SIZE))
 wood_image = pygame.transform.scale(wood_image, (TILE_SIZE, TILE_SIZE))
@@ -122,13 +120,13 @@ riddles = [
 
 # Функция для отображения окна после уровня
 def show_level_result(screen, message, color):
-    screen.fill((156, 180, 100))  
-    font = pygame.font.Font(None, 48)  
+    screen.fill((156, 180, 100))
+    font = pygame.font.Font(None, 48)
     text = font.render(message, True, color)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     screen.blit(text, text_rect)
-    pygame.display.flip()  
-    time.sleep(2)   
+    pygame.display.flip()
+    time.sleep(2)
 
 
 # Функция для загрузки рекорда из файла
@@ -568,3 +566,4 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+
