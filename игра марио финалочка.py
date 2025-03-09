@@ -12,7 +12,7 @@ pygame.mixer.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Марио - Собери монетки!")
+pygame.display.set_caption("Мир Боба - Собери монетки!")
 
 # Цвета
 BLUE = (0, 0, 255)
@@ -31,18 +31,16 @@ GRID_WIDTH = SCREEN_WIDTH // TILE_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // TILE_SIZE
 
 # Загрузка фоновой музыки
-pygame.mixer.music.load("music.mp3")  # Путь к файлу фоновой музыки
-pygame.mixer.music.set_volume(0.5    )  # Установка громкости
-pygame.mixer.music.play(-1)  # Бесконечное воспроизведение
+pygame.mixer.music.load("music.mp3")
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1)  
 
 
 # Загрузка изображений
 player_image = pygame.image.load("data/mario.png")
 coin_image = pygame.image.load("data/star.png")
-wall_image = pygame.image.load("data/box.png")
-enemy_image1 = pygame.image.load("data/dragon1.png")
-enemy_image2 = pygame.image.load("data/dragon2.png")
-grass_image = pygame.image.load("data/grass.png")
+wall_image = pygame.image.load("data/preg.jpg")
+wood_image = pygame.image.load("data/wood.jpg")
 flag_image = pygame.image.load("data/flag.png")
 fire_image = pygame.image.load("data/fireball.png")
 question_image = pygame.image.load("data/question.png")
@@ -53,9 +51,7 @@ fon_image = pygame.image.load("data/fon.jpg")
 player_image = pygame.transform.scale(player_image, (TILE_SIZE, TILE_SIZE))
 coin_image = pygame.transform.scale(coin_image, (TILE_SIZE, TILE_SIZE))
 wall_image = pygame.transform.scale(wall_image, (TILE_SIZE, TILE_SIZE))
-enemy_image1 = pygame.transform.scale(enemy_image1, (TILE_SIZE, TILE_SIZE))
-enemy_image2 = pygame.transform.scale(enemy_image2, (TILE_SIZE, TILE_SIZE))
-grass_image = pygame.transform.scale(grass_image, (TILE_SIZE, TILE_SIZE))
+wood_image = pygame.transform.scale(wood_image, (TILE_SIZE, TILE_SIZE))
 flag_image = pygame.transform.scale(flag_image, (TILE_SIZE, TILE_SIZE))
 fire_image = pygame.transform.scale(fire_image, (TILE_SIZE, TILE_SIZE))
 question_image = pygame.transform.scale(question_image, (TILE_SIZE, TILE_SIZE))
@@ -126,13 +122,13 @@ riddles = [
 
 # Функция для отображения окна после уровня
 def show_level_result(screen, message, color):
-    screen.fill((156, 180, 100))  # Зеленый фон
-    font = pygame.font.Font(None, 48)  # Создаем шрифт большего размера
+    screen.fill((156, 180, 100))  
+    font = pygame.font.Font(None, 48)  
     text = font.render(message, True, color)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     screen.blit(text, text_rect)
-    pygame.display.flip()  # Обновляем экран
-    time.sleep(2)  # Ждем 2 секунды
+    pygame.display.flip()  
+    time.sleep(2)   
 
 
 # Функция для загрузки рекорда из файла
@@ -155,19 +151,39 @@ def save_record(score, record, enemies_killed):
         file.write(f"{enemies_killed}\n")
 
 
-# Класс игрока
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = player_image
+        self.images = []
+        for num in range(3, 6):  # Загружаем два кадра анимации
+            img = pygame.image.load(f"data/boy_run_{num}.png")
+            img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
+            self.images.append(img)
+        self.image = self.images[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x * TILE_SIZE, y * TILE_SIZE)
+        self.index = 0
+        self.animation_timer = 0
+        self.is_moving = False
 
     def move(self, dx, dy, walls):
         new_rect = self.rect.move(dx * TILE_SIZE, dy * TILE_SIZE)
         if not any(new_rect.colliderect(wall.rect) for wall in walls):
             self.rect = new_rect
+            self.is_moving = True
+        else:
+            self.is_moving = False
 
+    def update(self):
+        # Обновление анимации
+        if self.is_moving:
+            self.animation_timer += 1
+            if self.animation_timer >= 3:  # Смена кадра каждые 10 тиков
+                self.animation_timer = 0
+                self.index = (self.index + 1) % len(self.images)  # Переключаем кадр
+                self.image = self.images[self.index]
+        else:
+            self.image = self.images[0]  # Если игрок стоит, показываем первый кадр
 
 # Класс монетки
 class Coin(pygame.sprite.Sprite):
@@ -193,8 +209,14 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
         # Загрузка анимационных кадров
         self.frames = [
-            pygame.transform.scale(pygame.image.load("data/dragon1.png"), (TILE_SIZE, TILE_SIZE)),
-            pygame.transform.scale(pygame.image.load("data/dragon2.png"), (TILE_SIZE, TILE_SIZE))
+            pygame.transform.scale(pygame.image.load("data/enemy_run_1.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/enemy_run_2.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/enemy_run_3.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/enemy_run_4.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/enemy_run_5.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/enemy_run_6.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/enemy_run_7.png"), (TILE_SIZE, TILE_SIZE)),
+            pygame.transform.scale(pygame.image.load("data/enemy_run_8.png"), (TILE_SIZE, TILE_SIZE)),
         ]
         self.current_frame = 0
         self.image = self.frames[self.current_frame]  # Начальное изображение
@@ -207,7 +229,7 @@ class Enemy(pygame.sprite.Sprite):
     def update_animation(self):
         # Обновление анимации
         self.animation_timer += 1
-        if self.animation_timer >= 15:  # Смена кадра каждые 10 кадров
+        if self.animation_timer >= 3:  # Смена кадра каждые 3 тика
             self.animation_timer = 0
             self.current_frame = (self.current_frame + 1) % len(self.frames)
             self.image = self.frames[self.current_frame]
@@ -227,8 +249,8 @@ class Enemy(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.image, True, False)
 
     def update(self, walls):
-        self.move(walls)  # Движение
         self.update_animation()  # Обновление анимации
+        self.move(walls)  # Движение
 # Класс огонька
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
@@ -334,8 +356,8 @@ def display_riddle(question):
 # Функция для отображения стартового окна
 def start_screen():
     screen.blit(fon_image, (0, 0))
-    font = pygame.font.Font(None, 48)  # Создаем шрифт большего размера
-    title_text = font.render("Добро пожаловать в игру Марио!", True, BLACK)
+    font = pygame.font.Font(None, 48)
+    title_text = font.render("Добро пожаловать в игру Bob's World!", True, BLACK)
     title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100))
     instruction_text = font.render("Нажмите SPACE, чтобы начать", True, RED)
     instruction_rect = instruction_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
@@ -370,7 +392,7 @@ max_levels = len(levels)
 score = 0
 enemies_killed = 0
 clock = pygame.time.Clock()
-FPS = 10
+FPS = 5
 
 # Загрузка рекорда
 record, _ = load_record()
@@ -381,7 +403,7 @@ while current_level < max_levels:
     running = True
 
     while running:
-        screen.fill((0, 255, 0))  # Зеленый фон (трава)
+        screen.fill((0, 255, 0))
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -412,6 +434,11 @@ while current_level < max_levels:
                     projectiles.add(Projectile(player_group.sprites()[0].rect.x // TILE_SIZE,
                                                player_group.sprites()[0].rect.y // TILE_SIZE, (1, 0)))
 
+        player_group.update()
+        for enemy in enemies_group:
+            enemy.update(walls)
+
+
         # Проверка столкновений с монетками
         for coin in pygame.sprite.groupcollide(player_group, coins_group, False, True).values():
             score += 15
@@ -428,7 +455,7 @@ while current_level < max_levels:
 
         # Проверка столкновений с интеллектуальной клеткой
         for cell in pygame.sprite.groupcollide(player_group, intelligence_cells, False, True).keys():
-            riddle = riddles[current_level]  # Получаем загадку для текущего уровня
+            riddle = riddles[current_level]
             correct = riddle["answer"]
             answer = display_riddle(riddle["question"])
             if answer.lower() == riddle["answer"]:
@@ -457,7 +484,7 @@ while current_level < max_levels:
         # Отрисовка игрового поля
         for row in range(GRID_HEIGHT):
             for col in range(GRID_WIDTH):
-                screen.blit(grass_image, (col * TILE_SIZE, row * TILE_SIZE))
+                screen.blit(wood_image, (col * TILE_SIZE, row * TILE_SIZE))
 
         # Отрисовка стен
         walls.draw(screen)
@@ -484,7 +511,7 @@ while current_level < max_levels:
     # Функция для отображения одного сообщения на экране
     def show_single_message(screen, message, color):
         screen.fill((156, 180, 100))  # Зеленый фон
-        font = pygame.font.Font(None, 36)  # Создаем шрифт
+        font = pygame.font.Font(None, 36)
         text = font.render(message, True, color)
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         screen.blit(text, text_rect)
